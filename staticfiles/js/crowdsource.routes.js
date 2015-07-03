@@ -353,6 +353,10 @@
         templateUrl: '/static/templates/contributors/aginzberg.html'
     })
 
+    .when('/contributors/muna', {
+      templateUrl: '/static/templates/contributors/muna.html'
+    })
+    
     .otherwise('/');
   }
 })();
