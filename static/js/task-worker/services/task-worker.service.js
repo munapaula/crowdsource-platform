@@ -23,7 +23,8 @@
     */
     var TaskWorker = {
       getTaskWorker: getTaskWorker,
-      submitResult: submitResult
+      submitResult: submitResult,
+      attemptAllocateTask: attemptAllocateTask
     };
 
     return TaskWorker;
@@ -39,14 +40,26 @@
 
     function submitResult(taskWorkerId, results) {
       var settings = {
-        url: '/api/task-worker/' + taskWorkerId + '/',
-        method: 'POST',
+        url: '/api/task-worker-result/' + taskWorkerId + '/',
+        method: 'PUT',
         data: {
           result: results
         }
       };
       return HttpService.doRequest(settings); 
     }
+
+    function attemptAllocateTask(module_id) {
+      var settings = {
+        url: '/api/task-worker/',
+        method: 'POST',
+        data: {
+          module: module_id
+        }
+      };
+      return HttpService.doRequest(settings);
+    }
+
 
   }
 })();

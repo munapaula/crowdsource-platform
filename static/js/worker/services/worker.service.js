@@ -19,26 +19,19 @@
   function Worker($cookies, $http, $q, $location, HttpService) {
     var Worker = {
       getWorkerPrivateProfile: getWorkerPrivateProfile,
-      getWorkerTaskPortfolio : getWorkerTaskPortfolio,
       addSkill: addSkill,
       removeSkill: removeSkill
     };
 
     return Worker;
-
-    function getWorkerPrivateProfile(username) {
+    
+    function getWorkerPrivateProfile(profileid) {
+      
       var settings = {
-        url: '/api/worker/' + username + '/',
+        url: '/api/profile/' + profileid + '/',
         method: 'GET'
       };
       return HttpService.doRequest(settings);
-    }   
-
-    function getWorkerTaskPortfolio() {
-      return $http({
-        url: 'https://api.myjson.com/bins/q7jc',
-        method: 'GET'
-      });
     }
 
     function addSkill(skillId) {

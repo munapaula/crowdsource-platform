@@ -10,12 +10,14 @@
     .module('crowdsource.task-feed.controllers')
     .controller('TaskFeedController', TaskFeedController);
 
-  TaskFeedController.$inject = ['$window', '$location', '$scope', 'TaskFeed', '$filter', 'Authentication'];
+  TaskFeedController.$inject = ['$window', '$location', '$scope', '$mdToast', 'TaskFeed',
+    '$filter', 'Authentication', 'TaskWorker', 'Project'];
 
   /**
   * @namespace TaskFeedController
   */
-  function TaskFeedController($window, $location, $scope, TaskFeed, $filter, Authentication) {
+  function TaskFeedController($window, $location, $scope, $mdToast, TaskFeed,
+    $filter, Authentication, TaskWorker, Project) {
       var userAccount = Authentication.getAuthenticatedAccount();
       if (!userAccount) {
         $location.path('/login');
@@ -24,21 +26,80 @@
       
       var self = this;
       self.toggleBookmark = toggleBookmark;
-      self.modules = [];
+      self.projects = [];
+      self.previewedModule = null;
+      self.showPreview = showPreview;
+      self.openTask = openTask;
+      self.openComments = openComments;
+      self.saveComment = saveComment;
 
       TaskFeed.getProjects().then(
-        function success (successData) {
-          var data = successData[0];
+        function success (data) {
+            self.projects = data[0];
         },
         function error(errData) {
           self.error = errData[0].detail;
+          $mdToast.showSimple('Could not get task with data.');
         }
       ).finally(function () {
-        self.modules.push({"id": 1, "milestoneDescription": "this is a milestone description", "payment":{"number_of_hits":"10","total":"6.00","wage_per_hit":"0.5","charges":"1"},"selectedCategories":[0,3,4],"name":"Sample project 1","description":"This is my sample description","taskType":"oneTask","upload":"noFile","onetaskTime":"1 hour","template":{"name":"template_bMuDT98e","items":[{"id":"id1","name":"label","type":"label","width":100,"height":100,"values":"Enter Name","role":"display","sub_type":"h4","layout":"column","icon":null,"data_source":null},{"id":"id2","name":"text_field_placeholder","type":"text_field","width":100,"height":100,"values":null,"role":"display","sub_type":null,"layout":"column","data_source":null},{"id":"id3","name":"label","type":"label","width":100,"height":100,"values":"Enter Place of Birth","role":"display","sub_type":"h4","layout":"column","icon":null,"data_source":null},{"id":"id4","name":"text_field_placeholder","type":"text_field","width":100,"height":100,"values":null,"role":"display","sub_type":null,"layout":"column","data_source":null},{"id":"id5","name":"label","type":"label","width":100,"height":100,"values":"Favorite Quote","role":"display","sub_type":"h4","layout":"column","icon":null,"data_source":null},{"id":"id6","name":"text_area_placeholder","type":"text_area","width":100,"height":100,"values":null,"role":"display","sub_type":null,"layout":"column","data_source":null}]}});
+        // pass
       });
 
       function toggleBookmark(project){
           project.is_bookmarked = !project.is_bookmarked;
+      }
+      function showPreview(module){
+          self.previewedModule = module;
+      }
+
+      function openTask(module_id){
+        TaskWorker.attemptAllocateTask(module_id).then(
+        function success (data) {
+            var task_id = data[0].task;
+            $location.path('/task/'+task_id);
+        },
+        function error(errData) {
+          var err = errData[0];
+          $mdToast.showSimple('Error attempting task - ' + JSON.stringify(err));
+        }
+        ).finally(function () {
+        });
+      }
+      function openComments(module){
+          if(module.comments && module.is_comment_expanded){
+              module.is_comment_expanded = false;
+          }
+          else if (module.comments && !module.is_comment_expanded){
+               module.is_comment_expanded = true;
+          }
+          else{
+              Project.getModuleComments(module.id).then(
+                function success(data) {
+                    angular.extend(module, {'comments': data[0].comments});
+                    module.is_comment_expanded = true;
+                },
+                function error(errData) {
+                  var err = errData[0];
+                  $mdToast.showSimple('Error fetching comments - ' + JSON.stringify(err));
+                }
+                ).finally(function () {});
+          }
+      }
+
+      function saveComment(module){
+            TaskFeed.saveComment(module.id, self.comment.body).then(
+                function success(data) {
+                    if(module.comments==undefined){
+                        angular.extend(module, {'comments': []});
+                    }
+                    module.comments.push(data[0]);
+                    self.comment.body = null;
+                },
+                function error(errData) {
+                  var err = errData[0];
+                  $mdToast.showSimple('Error saving comment - ' + JSON.stringify(err));
+                }
+            ).finally(function () {});
       }
   }
 
