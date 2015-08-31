@@ -35,7 +35,16 @@
 
       TaskFeed.getProjects().then(
         function success (data) {
-            self.projects = data[0];
+          self.projects = data[0];
+          self.availableTasks = false;
+          for(var i = 0; i < self.projects.length; i++) {
+            for (var j = 0; j < self.projects[i].modules.length; j++) {
+              if(self.projects[i].modules[j].available_tasks != 0) {
+                self.availableTasks = true;
+                return;
+              }
+            }
+          }
         },
         function error(errData) {
           self.error = errData[0].detail;
@@ -60,7 +69,14 @@
           },
           function error(errData) {
             var err = errData[0];
-            $mdToast.showSimple('Error attempting task - ' + JSON.stringify(err));
+            var message = null;
+            if (err.hasOwnProperty('detail')) {
+                message = err.detail;
+            }
+            else{
+                message = JSON.stringify(err);
+            }
+            $mdToast.showSimple('Error: ' + message);
           }
         ).finally(function () {
         });

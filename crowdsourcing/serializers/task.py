@@ -18,6 +18,7 @@ class TaskWorkerResultListSerializer(serializers.ListSerializer):
 
 class TaskWorkerResultSerializer(DynamicFieldsModelSerializer):
     template_item_id = serializers.SerializerMethodField()
+    result = serializers.CharField(allow_null=True)
 
     class Meta:
         model = models.TaskWorkerResult

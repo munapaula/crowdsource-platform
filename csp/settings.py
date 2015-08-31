@@ -162,11 +162,13 @@ TEMPLATE_DIRS = (
 
 # Email
 EMAIL_HOST = 'localhost'
-#EMAIL_PORT = 587
-#EMAIL_USE_TLS = True
-EMAIL_ENABLED = False
-EMAIL_SENDER = 'crowdsourcing.platform.demo@gmail.com'
-EMAIL_SENDER_PASSWORD = 'crowdsourcing.demo.2015'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_ENABLED = True
+EMAIL_SENDER = 'daemo@cs.stanford.edu'
+EMAIL_SENDER_DEV = 'crowdsourcing.platform.demo@gmail.com'
+EMAIL_SENDER_PASSWORD_DEV = 'crowdsourcing.demo.2015'
+SENDGRID_API_KEY = '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'
 
 # Others
 REGISTRATION_ALLOWED = True
